@@ -1,6 +1,6 @@
 {
   "name": "digger-meta-cache",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "A warehouse that saves the tag, id and class meta data from all warehouses on the network into Redis",
   "main": "src/index.js",
   "scripts": {
