@@ -21,6 +21,42 @@ var async = require('async');
 */
 module.exports = function(config, $digger){
 
+	var prefix = config.prefix || 'diggermeta:';
+
+	var ignores = {};
+	var includes = [];
+
+	(config.ignore_paths || []).forEach(function(ignore){
+		ignores[ignore] = true;
+	})
+
+	includes = includes.concat((config.include_paths || []));
+
+	// check if we ignoring the given path
+	function check_path(url){
+		var parts = url.split('/');
+		var found = false;
+
+		// if there are any includes the url must start with one of them
+		if(includes.length>0){
+			var includehit = false;
+			includes.forEach(function(include){
+				if(url.indexOf(include)==0){
+					includehit = true;
+				}
+			})
+			return includehit;
+		}
+
+		while(!found && parts.length>0){
+			var checkurl = parts.join('/');
+			found = ignores[checkurl] ? true : false;
+			parts.pop();
+		}
+
+		return !found;
+	}
+
 	function remove_data(base_key, data, done){
 		var fns = [];
 
@@ -82,7 +118,13 @@ module.exports = function(config, $digger){
 			var supplier_url = headers['x-supplier-route'];
 			var base_key = supplier_url + '/';
 
+			
+
 			if(!supplier_url){
+				return;
+			}
+
+			if(!check_path(supplier_url)){
 				return;
 			}
 
@@ -176,6 +218,10 @@ module.exports = function(config, $digger){
 				return;
 			}
 
+			if(!check_path(supplier_url)){
+				return;
+			}
+
 			var model = packet.body || {};
 			var digger = model._digger || {};
 			var containerid = digger.diggerid;
@@ -243,6 +289,10 @@ module.exports = function(config, $digger){
 			var base_key = supplier_url + '/';
 
 			if(!supplier_url){
+				return;
+			}
+
+			if(!check_path(supplier_url)){
 				return;
 			}
 
